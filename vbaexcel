@@ -1,0 +1,176 @@
+
+Sub filtrarNaranja()
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    Dim CeldaEnRango As Boolean
+    Dim TablaAFiltrar As Range
+    Dim Semaforo As Range
+    
+    
+    Set TablaAFiltrar = ws.Range("A1:F5")
+    Set Semaforo = ws.Range("A1:B5")
+    
+    CeldaEnRango = Not (Application.Intersect(ActiveCell, Semaforo) Is Nothing)
+    
+    If CeldaEnRango Then
+        TablaAFiltrar.AutoFilter Field:=ActiveCell.Column, Criteria1:=RGB(255, 192, 0), Operator:=xlFilterCellColor
+    End If
+  
+
+End Sub
+
+
+
+Sub LimpiarFiltro()
+ 
+    Dim TablaAFiltrar As Range
+    Dim Semaforo As Range
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    Set TablaAFiltrar = ws.Range("A1:F5")
+    Set Semaforo = ws.Range("A1:B5")
+    
+    Set ws = ActiveSheet
+    ' Limpiar el filtro
+    ws.AutoFilterMode = False
+    TablaAFiltrar.AutoFilter
+   
+End Sub
+
+
+
+Sub InsertarFilaFinalConFormato()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Referencia a la hoja que contiene la tabla
+    Set ws = ActiveSheet ' Ajusta esto según tu necesidad
+    
+    ' Encuentra la última fila con datos en la columna A
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Inserta una nueva fila después de la última fila de datos
+    ws.Rows(lastRow + 1).Insert Shift:=xlDown
+    
+    ' Copia el formato de la fila anterior
+    ws.Rows(lastRow).Copy
+    
+    ' Pegar el formato en la nueva fila
+    With ws.Rows(lastRow + 1)
+        .PasteSpecial Paste:=xlPasteFormats
+        .PasteSpecial Paste:=xlPasteFormulas
+    End With
+    
+    Application.CutCopyMode = False
+    
+    ' Ajusta el contenido de la primera celda de la nueva fila (reemplaza "A" con tu columna deseada)
+    ws.Cells(lastRow + 1, "A").Value = "12/02/2012"
+    ' Limpia las variables
+    Set ws = Nothing
+End Sub
+
+
+Function CalcularEdad2(varBirthDate As Date) As Integer
+    Dim varAge As Variant
+    
+    If IsNull(varBirthDate) Then
+        CalcularEdad = 0
+        Exit Function
+    End If
+    
+    varAge = DateDiff("yyyy", varBirthDate, Now)
+    
+    If Date < DateSerial(Year(Now), Month(varBirthDate), Day(varBirthDate)) Then
+        varAge = varAge - 1
+    End If
+    
+    CalcularEdad2 = CInt(varAge)
+End Function
+
+
+Sub AplicarFormatoCondicionalRojo()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Ajusta esto según tu hoja y columna de interés
+    Set ws = ActiveSheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Ajusta el rango según tus necesidades
+    With ws.Range("C3:C" & lastRow).FormatConditions
+        .Delete
+      
+        
+        ' Añadir una nueva regla de color
+        .Add Type:=xlCellValue, Operator:=xlGreaterEqual, Formula1:="=C3>=12"
+        
+        ' Configurar el color del fondo
+        .Item(1).Interior.Color = RGB(255, 0, 0) ' Rojo
+        
+        ' Asegurar que el formato persiste incluso después de que la condición se cumple
+        .Item(1).StopIfTrue = False
+    End With
+    
+End Sub
+
+
+Sub CalcularEdadYPintaColorCondicional()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Ajusta esto según tu hoja
+    Set ws = ActiveSheet
+    
+    ' Obtener el número de filas
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Aplicar formato condicional a la columna B
+    With ws.Range("C3:C" & lastRow)
+        .FormatConditions.Delete
+        .FormatConditions.Add Type:=xlExpression, Formula1:="=(B3>12)"
+    '.FormatConditions.Add Type:=xlCellValue, Operator:=xlGreater, Formula1:="=YEAR(TODAY())-YEAR(A3)-IF(MONTH(TODAY())<MONTH(A3),12-MONTH(A3),0)>12"
+        
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0) ' Rojo
+        .FormatConditions(1).StopIfTrue = False
+    End With
+End Sub
+
+Sub AplicarFormatoCondicionalEdad()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    
+    ' Ajusta esto según tu hoja
+    Set ws = ActiveSheet
+    
+    ' Obtener el número de filas
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' Aplicar formato condicional usando xlExpression
+    With ws.Range("C3:C" & lastRow)
+        .FormatConditions.Delete
+        
+        .FormatConditions.Add Type:=xlExpression, Formula1:="=B3<12"
+        
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0) ', RGB(255, 165, 0), RGB(0, 255, 0))
+        .FormatConditions.Add Type:=xlExpression, Formula1:="=B3=12"
+        .FormatConditions(2).Interior.Color = RGB(255, 165, 0)
+        .FormatConditions.Add Type:=xlExpression, Formula1:="=B3>12"
+        .FormatConditions(3).Interior.Color = RGB(0, 255, 0)
+         
+        .FormatConditions(1).StopIfTrue = False
+    End With
+End Sub
+
+
+'With ws.Range("A4")
+'Range("A4").Select
+'Selection.FormatConditions.Delete
+'Selection.FormatConditions.Add Type:=xlExpression, Formula1:="=ISBLANK(A4)"
+'Selection.FormatConditions(1).Interior.ColorIndex = 3
+'Selection.FormatConditions.Add Type:=xlExpression, Formula1:="=A4=0"
+'Selection.FormatConditions(2).Interior.ColorIndex = 4
+'Selection.FormatConditions.Add Type:=xlExpression, Formula1:="=A4>0"
+'Selection.FormatConditions(3).Interior.ColorIndex = 34
+'End With
+
+
