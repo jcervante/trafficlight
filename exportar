@@ -1,0 +1,72 @@
+Public row_inicio As Long
+
+ 
+ Public Function ProxT(ByVal fechacump As Date, ByVal fechain As Date) As Variant
+    Dim fecha As Date
+    Dim i As Integer
+    i = 0
+    fecha = fechacump
+    While fecha <= fechain And i < 35
+        fecha = DateAdd("yyyy", 3, fecha)
+        i = i + 1
+    Wend
+    ProxTrienio = fecha
+ End Function
+
+
+Public Function ProxIn(ByVal fechacump As Date, ByVal fechain As Date) As Variant
+    Dim miarray() As Variant
+    Dim i As Integer
+    Dim fecha As Date
+    
+    miarray = Array(15, 20, 25, 30)
+    For i = 0 To UBound(miarray)
+       fecha = DateAdd("yyyy", miarray(i), fechacump)
+       If fecha > fechain Then
+            ProxIncVacaciones = fecha
+            Exit Function
+       End If
+       
+    Next i
+    
+    ProxIncVacaciones = ""
+End Function
+
+
+Public Sub CopiaFilayBorrarOrigina()
+    Dim wsDestino As Worksheet
+    Dim wsOrigen As Worksheet
+    Dim lastrow, fila As Long
+    Dim fileDestino As String
+    
+    
+    fileDestino = ActiveWorkbook.Path & "\Consulta2.xlsx"
+    Set wsDestino = Workbooks.Open(fileDestino).Sheets("Hoja1")
+    
+    Set wsOrigen = ThisWorkbook.Sheets("Hoja4")
+    lastrow = wsOrigen.Cells(wsOrigen.Rows.Count, "A").End(xlUp).Row
+
+    
+    row_inicio = 20
+    
+    For i = lastrow To row_inicio Step -1
+        If wsOrigen.Cells(i, "D").Value = "Baja" Then
+           ' Dim lastrow_destino As Long
+            'lastrow_destino = wsDestino.Cells(wsDestino.Rows.Count, "A").End(xlUp).Row
+            
+            wsDestino.Rows(2).Insert Shift:=xlDown
+            
+           ' wsOrigen.Rows(i).Copy Destination:=wsDestino.range("A" & lastrow_destino)
+            wsOrigen.Rows(i).Copy
+            wsDestino.range("A" & 2).PasteSpecial xlPasteValues
+            wsOrigen.Rows(i).Delete Shift:=xlUp
+            
+        End If
+    Next i
+    
+    Application.CutCopyMode = False
+    
+    ' Cerrar el libro destino si es necesario
+    Workbooks("Consulta2.xlsx").Close True
+    
+End Sub
