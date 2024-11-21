@@ -1,3 +1,38 @@
+
+
+Sub InsertarFilaConFormato()
+    Dim rango As Range
+    Set rango = ActiveSheet.Rows(25).EntireRow
+    
+    ' Inserta la fila
+    rango.Offset(0).Insert Shift:=xlDown
+    
+    ' Copia el formato de la fila inferior
+    rango.Offset(0).Copy
+    rango.Offset(-1).PasteSpecial xlPasteFormats
+    
+    ' Elimina el contenido copiado
+   ' rango.Offset(0).Cells.ClearContents
+    
+    ' Ajusta el rango seleccionado
+    rango.Select
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Public row_inicio As Long
 
  
