@@ -1,4 +1,24 @@
 
+Function ColumnLetter(ColumnNumber As Long) As String
+    If ColumnNumber < 1 Or ColumnNumber > 1048576 Then
+        ColumnLetter = ""  ' Salir si el número está fuera de rango
+        Exit Function
+    End If
+    
+    Dim letters() As Variant
+    letters = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
+    
+    If ColumnNumber <= 26 Then
+        ColumnLetter = letters(ColumnNumber - 1)
+    Else
+        Dim ind1 As Long
+        ind1 = (ColumnNumber \ 26 - 1)
+       
+        ColumnLetter = letters((ColumnNumber) \ 26 - 1) & letters((ColumnNumber - 1) Mod 26)
+    End If
+End Function
+
+
 
 Sub InsertarFilaConFormato()
     Dim rango As Range
