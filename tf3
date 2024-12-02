@@ -1,0 +1,257 @@
+
+Public start_row As Long
+Public dict_cols As Collection
+
+
+'Global Const vbNaranja As Long = RGB(255, 165, 0)
+
+
+Public Function ColumnLetter(ColumnNumber As Long) As String
+    If ColumnNumber < 1 Or ColumnNumber > 1048576 Then
+        ColumnLetter = ""  ' Salir si el número está fuera de rango
+        Exit Function
+    End If
+    
+    Dim letters() As Variant
+    letters = Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
+    
+    If ColumnNumber <= 26 Then
+        ColumnLetter = letters(ColumnNumber - 1)
+    Else
+        Dim ind1 As Long
+        ind1 = (ColumnNumber \ 26 - 1)
+       
+        ColumnLetter = letters((ColumnNumber) \ 26 - 1) & letters((ColumnNumber - 1) Mod 26)
+    End If
+End Function
+
+Public Sub AplicarCondicionales()
+    Dim ws As Worksheet
+    Dim last_row As Long
+    
+    start_row = 5
+    
+    Set ws = ThisWorkbook.Sheets("Hoja3")
+    last_row = ws.Cells(Rows.Count, "E").End(xlUp).Row
+  
+  
+  'Edad hijos
+    
+    With ws.Range("A" & start_row & ":A" & last_row)
+        .FormatConditions.Delete
+        .FormatConditions.Add xlExpression, Formula1:="=CalcularEdad($E5)<12"
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=CalcularEdad($E5)=12"
+        .FormatConditions(2).Interior.Color = RGB(255, 192, 0)
+        
+        .FormatConditions.Add xlExpression, Formula1:="=Y(NO(ESBLANCO($E5));CalcularEdad($E5)>12)"
+        .FormatConditions(3).Interior.Color = RGB(0, 255, 0)
+        
+        .FormatConditions(1).StopIfTrue = True
+        .FormatConditions(2).StopIfTrue = True
+        .FormatConditions(3).StopIfTrue = True
+    End With
+    
+    'Edad mas de 65
+    
+     With ws.Range("B" & start_row & ":B" & last_row)
+        .FormatConditions.Delete
+        .FormatConditions.Add xlExpression, Formula1:="=Y(NO(ESBLANCO($E5));CalcularEdad($E5)>=65)"
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0)
+        .FormatConditions(1).StopIfTrue = False
+    End With
+    
+    
+    'Trienios
+    
+    With ws.Range("C" & start_row & ":C" & last_row)
+        .FormatConditions.Delete
+        .FormatConditions.Add xlExpression, Formula1:="=Y(DIAS($E5;Hoy())<=30)"
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=Y(DIAS($E5;Hoy())<=60;DIAS($E5;Hoy())>30)"
+        .FormatConditions(2).Interior.Color = RGB(255, 192, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=Y(DIAS($E5;Hoy())<=90;DIAS($E5;Hoy())>60)"
+        .FormatConditions(3).Interior.Color = RGB(0, 255, 0)
+        
+    End With
+    
+    
+    
+    
+End Sub
+
+
+Public Sub AplicaFormatos()
+ Dim ws As Worksheet
+    Dim last_row As Long
+    
+    start_row = 9
+    
+    Set ws = ThisWorkbook.Sheets("Hoja6")
+    last_row = 16 ' ws.Cells(Rows.Count, "E").End(xlUp).Row
+  
+    'Trienios
+    
+    With ws.Range("J" & start_row & ":J" & last_row)
+        .FormatConditions.Delete
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($K9)=1)"
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($K9)=2)"
+        .FormatConditions(2).Interior.Color = RGB(255, 192, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($K9)=3)"
+        .FormatConditions(3).Interior.Color = RGB(0, 255, 0)
+        .FormatConditions(1).StopIfTrue = False
+        .FormatConditions(2).StopIfTrue = False
+        .FormatConditions(3).StopIfTrue = False
+    End With
+
+End Sub
+
+
+Public Sub formp()
+    Call AplicaFormatosSemaforoFecha("J", "K")
+End Sub
+
+Public Sub AplicaFormatosSemaforoFecha(ByVal col_indicador As String, ByVal col_chequear As String)
+
+     Dim last_row As Long
+     Dim auxstring As String
+    
+    start_row = 9
+    
+    Set ws = ThisWorkbook.Sheets("Hoja6")
+    last_row = 16 ' ws.Cells(Rows.Count, "E").End(xlUp).Row
+  
+    'Trienios
+    aux_string = col_chequear & start_row
+    With ws.Range(col_indicador & start_row & ":" & col_indicador & last_row)
+        .FormatConditions.Delete
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($" & aux_string & ")=1)"
+        .FormatConditions(1).Interior.Color = RGB(255, 0, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($" & aux_string & ")=2)"
+        .FormatConditions(2).Interior.Color = RGB(255, 192, 0)
+        .FormatConditions.Add xlExpression, Formula1:="=(GenerarAviso($" & aux_string & ")=3)"
+        .FormatConditions(3).Interior.Color = RGB(0, 255, 0)
+        .FormatConditions(1).StopIfTrue = False
+        .FormatConditions(2).StopIfTrue = False
+        .FormatConditions(3).StopIfTrue = False
+    End With
+
+
+End Sub
+
+
+Public Function CalcularEdad(fechain As Date) As Integer
+    CalcularEdad = DateDiff("yyyy", fechain, Date)
+
+End Function
+
+Public Sub EnviarHistoricoDoc()
+   Call EnviarHistoricoFnc(ThisWorkbook.Path & "\Historico\Historico.xlsx", "Hoja1")
+End Sub
+
+Public Function EnviarHistoricoFnc(ByVal nombrefich As String, ByVal hojades As String)
+    Dim wbDestino As Workbook
+    Dim wsOrigen, wsDestino As Worksheet
+    Dim lastrow1, lastrow2 As Long
+    Dim offset1, offset2 As Long
+    
+     
+    
+    On Error GoTo handler
+    Debug.Print (nombrefich)
+    
+    
+    Set wbDestino = Workbooks.Open(nombrefich)
+    Set wsDestino = wbDestino.Sheets(hojades)
+    Set wsOrigen = ThisWorkbook.Sheets("Hoja3")
+    
+    offset1 = 16
+    offset2 = 5
+    
+    
+    lastrow1 = wsOrigen.Cells(Rows.Count, "B").End(xlUp).Row
+    lastrow2 = wsDestino.Cells(Rows.Count, "B").End(xlUp).Row
+    
+    Dim fila As Long
+    
+    For fila = lastrow1 To offset1 Step -1
+        If wsOrigen.Cells(fila, "H").Value = "Terminado" Then
+            Dim rng1, rng2, rng3 As Range
+            
+            Set rng1 = wsOrigen.Range("A" & fila & ",B" & fila)
+            Set rng2 = wsOrigen.Range("E" & fila & ":H" & fila)
+            Set rng3 = Union(rng1, rng2)
+            
+            
+            wsDestino.Rows(offset2).Insert shift:=xlDown
+            rng3.Copy
+            wsDestino.Range("A" & offset2).PasteSpecial Paste:=xlPasteValues
+            
+            rng2.Cells.Clear
+            
+            wsDestino.Rows(offset2 + 1).Copy
+            wsDestino.Range("A" & offset2).PasteSpecial Paste:=xlPasteFormats
+            
+            Application.CutCopyMode = False
+           
+        End If
+    
+    Next fila
+    wbDestino.Close True
+  Exit Function
+handler:
+       MsgBox ("Error al enviar datos al Historico")
+End Function
+
+
+
+
+
+Public Sub encontrar()
+    Dim encontrar As Range
+    Dim buscar As String
+    buscar = "Daniel"
+    Set encontrar = ThisWorkbook.Sheets("Hoja3").Columns(14).Find(buscar, LookIn:=xlValues, LookAt:=xlWhole)
+
+    If Not encontrar Is Nothing Then
+        MsgBox "El valor '" & buscar & "' se encuentra en la celda " & encontrar.Address
+    Else
+        MsgBox "El valor '" & buscar & "' no se encontró en la columna."
+    End If
+End Sub
+
+
+Public Function GenerarAviso(fechain As Variant) As Integer
+    Dim hoy As Date
+    hoy = Date
+    If Not IsEmpty(fechain) And IsDate(fechain) Then
+        Dim fechaviso1, fechaviso2, fechaviso3 As Date
+        fechaviso1 = DateAdd("m", -1, CDate(fechain))
+        fechaviso2 = DateAdd("m", -2, CDate(fechain))
+        fechaviso3 = DateAdd("m", -3, CDate(fechain))
+        
+        If hoy >= fechaviso1 Then
+            GenerarAviso = 1 'Rojo
+            Exit Function
+        End If
+        
+        If hoy >= fechaviso2 And hoy < fechaviso1 Then
+            GenerarAviso = 2 'Naranja
+            Exit Function
+        End If
+    
+        If hoy >= fechaviso3 And hoy < fechaviso2 Then
+            GenerarAviso = 3 'Verde
+            Exit Function
+        End If
+    End If
+    GenerarAviso = 0
+End Function
+
+
+Public Sub Cargarconfiguracion()
+    
+End Sub
+
+End Sub
